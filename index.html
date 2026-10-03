@@ -1,0 +1,108 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="Who Is That? - match familiar faces to their names. A calm recognition activity.">
+  <meta name="theme-color" content="#fffaf3">
+  <title>Who Is That? - Pixel Players</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%233f2819'/%3E%3Ccircle cx='16' cy='12' r='6' fill='%23d4c4a9'/%3E%3Cpath d='M 6 26 Q 16 20 26 26 L 26 32 L 6 32 Z' fill='%23b8a082'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="./src/output.css" rel="stylesheet">
+</head>
+<body class="min-h-dvh bg-linear-to-b from-cream via-cream to-teal-50 font-body text-warm-900 antialiased">
+  <div class="mx-auto flex min-h-dvh w-full max-w-3xl flex-col gap-3 px-3 py-4 sm:gap-4 sm:px-5 sm:py-6">
+    <header class="pixel-panel">
+      <div class="flex flex-wrap items-center gap-2">
+        <div class="brand-row flex min-w-0 flex-1 items-center gap-2.5">
+          <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-warm-900 p-1 shadow-sm sm:h-12 sm:w-12" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 32 32" class="sm:w-8 sm:h-8">
+              <circle cx="16" cy="11" r="6" fill="#d4c4a9"/>
+              <path d="M 6 26 Q 16 20 26 26 L 26 32 L 6 32 Z" fill="#b8a082"/>
+            </svg>
+          </span>
+          <div class="min-w-0">
+            <h1 class="font-pixel text-[11px] leading-relaxed tracking-wide text-teal-800 sm:text-sm">WHO IS THAT?</h1>
+            <p class="mt-1 hidden text-xs font-bold text-warm-500 sm:block">Recognition - Take your time</p>
+          </div>
+        </div>
+
+        <div class="btn-row flex shrink-0 items-center gap-2">
+          <p id="stateBadge" class="flex shrink-0 items-center gap-1 rounded-full bg-white/85 px-2.5 py-1 text-[11px] font-bold text-teal-900 ring-2 ring-teal-200 sm:text-xs">
+            <span id="stateBadgeIcon" aria-hidden="true">&#9679;</span>
+            <span id="stateBadgeText">READY</span>
+          </p>
+        </div>
+      </div>
+
+      <dl class="stat-row mt-3 grid grid-cols-3 gap-2">
+        <div class="stat-chip">
+          <dt>Round</dt>
+          <dd><span id="statRound">0</span> / <span id="statTotal">0</span></dd>
+        </div>
+        <div class="stat-chip">
+          <dt>Correct</dt>
+          <dd id="statCorrect">0</dd>
+        </div>
+        <div class="stat-chip">
+          <dt>Best Score</dt>
+          <dd id="statBest">0 / 0</dd>
+        </div>
+      </dl>
+    </header>
+
+    <main class="stage-wrap flex min-h-0 flex-1 flex-col items-center justify-center gap-4 sm:gap-6">
+      <section id="startScreen" class="w-full flex items-center justify-center">
+        <div class="pixel-panel max-w-xl text-center">
+          <div class="mx-auto mb-3 grid h-14 w-14 place-items-center rounded-2xl bg-warm-900 p-1.5 shadow-sm" aria-hidden="true">
+            <svg width="36" height="36" viewBox="0 0 32 32">
+              <circle cx="16" cy="11" r="7" fill="#d4c4a9"/>
+              <path d="M 4 28 Q 16 20 28 28 L 28 32 L 4 32 Z" fill="#b8a082"/>
+            </svg>
+          </div>
+          <h2 class="font-pixel text-base leading-relaxed text-teal-800 sm:text-2xl">WHO IS THAT?</h2>
+          <p class="mt-3 text-base font-bold text-warm-700 sm:text-lg">Match the faces of familiar people to their names.</p>
+          <p class="mt-2 text-sm font-semibold text-warm-600">Look at the face, read the names, and choose who you think it is.</p>
+          <p class="mt-3 inline-block rounded-2xl bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 ring-2 ring-emerald-200">No rush. Take your time.</p>
+          <button type="button" id="btnStart" class="primary-btn mt-5">START GAME</button>
+        </div>
+      </section>
+
+      <section id="gameScreen" class="hidden w-full flex flex-col items-center gap-4 sm:gap-6">
+        <div class="pixel-panel w-full max-w-2xl">
+          <div class="flex flex-col items-center gap-4 sm:gap-6">
+            <h2 id="questionText" class="text-center text-base font-bold text-warm-700 sm:text-lg">Who is this?</h2>
+            <div class="face-card relative flex aspect-square w-full max-w-[min(70vw,280px)] items-center justify-center overflow-hidden rounded-3xl border-4 border-warm-200 bg-warm-50 shadow-lg sm:max-w-[320px]">
+              <img id="faceImage" src="./assets/placeholder1.svg" alt="Person's face" class="h-full w-full object-contain object-center" decoding="async">
+            </div>
+            <div class="w-full">
+              <div id="optionsGrid" class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4"></div>
+            </div>
+            <p id="feedback" class="min-h-8 text-center text-base font-bold text-warm-700 sm:text-lg" aria-live="polite" role="status"></p>
+            <div id="nextContainer" class="hidden">
+              <button type="button" id="btnNext" class="primary-btn">NEXT</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="completeScreen" class="hidden w-full flex items-center justify-center">
+        <div class="pixel-panel max-w-xl text-center">
+          <p class="mb-1 text-5xl" aria-hidden="true">&#127881;</p>
+          <h2 class="font-pixel text-base leading-relaxed text-teal-800 sm:text-2xl">WELL DONE!</h2>
+          <p id="completeMessage" class="mt-3 text-base font-bold text-warm-700 sm:text-lg">You recognised 0 out of 0 people.</p>
+          <p class="mt-2 text-sm font-semibold text-warm-600">Take your time - every round is a chance to practise.</p>
+          <p id="completeBest" class="mt-3 inline-block rounded-2xl bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-700 ring-2 ring-amber-200 hidden"></p>
+          <button type="button" id="btnPlayAgain" class="primary-btn mt-5">PLAY AGAIN</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <p id="announcer" class="sr-only" role="status" aria-live="polite"></p>
+
+  <script src="./script.js"></script>
+</body>
+</html>

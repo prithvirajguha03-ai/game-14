@@ -1,0 +1,85 @@
+﻿@import "tailwindcss";
+@source "../index.html";
+@source "../script.js";
+
+@theme {
+  --font-pixel: "Press Start 2P", ui-monospace, monospace;
+  --font-body: "Nunito", ui-sans-serif, system-ui, sans-serif;
+
+  --color-cream: #fffaf3;
+  --color-warm-50: #fffaf3;
+  --color-warm-100: #fdf3e3;
+  --color-warm-200: #f6dfc1;
+  --color-warm-300: #efcda3;
+  --color-warm-400: #e6b585;
+  --color-warm-500: #c08457;
+  --color-warm-600: #a06a44;
+  --color-warm-700: #7d5235;
+  --color-warm-800: #5f3d28;
+  --color-warm-900: #3f2819;
+}
+
+@keyframes pop-in {
+  0% { transform: scale(.88); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+
+@layer components {
+  html,
+  body {
+    min-height: 100%;
+  }
+
+  .pixel-panel {
+    @apply rounded-3xl border-2 border-warm-200 bg-white/80 p-4 backdrop-blur-sm sm:p-6;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.7),
+      0 4px 0 var(--color-warm-300),
+      0 12px 24px rgba(63, 40, 25, 0.08);
+  }
+
+  .stat-chip {
+    @apply flex flex-col items-center rounded-2xl border-2 border-warm-200 bg-white px-2 py-1.5 text-center;
+    box-shadow: 0 2px 0 var(--color-warm-200);
+  }
+  .stat-chip dt {
+    @apply text-[10px] font-bold uppercase tracking-wider text-warm-500 sm:text-xs;
+  }
+  .stat-chip dd {
+    @apply text-lg leading-tight font-black text-teal-800 tabular-nums sm:text-xl;
+  }
+
+  .face-card {
+    animation: pop-in 0.25s ease-out;
+  }
+
+  .option-btn {
+    @apply w-full rounded-2xl border-2 border-warm-200 bg-white px-4 py-3 text-base font-bold text-warm-800 transition hover:bg-warm-50 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-400 disabled:cursor-not-allowed disabled:opacity-60 sm:px-6 sm:py-4 sm:text-lg;
+    box-shadow: 0 3px 0 var(--color-warm-200);
+    min-height: 3.5rem;
+  }
+
+  .option-btn.correct {
+    @apply border-emerald-400 bg-emerald-50 text-emerald-900 ring-4 ring-emerald-300;
+  }
+
+  .option-btn.incorrect {
+    @apply border-rose-300 bg-rose-50 text-rose-800;
+  }
+
+  .primary-btn {
+    @apply inline-flex items-center justify-center rounded-2xl border-2 border-teal-300 bg-teal-100 px-8 py-3 text-sm font-black text-teal-900 transition hover:bg-teal-200 active:scale-95 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-400 sm:text-base;
+    box-shadow: 0 3px 0 var(--color-teal-300, #86efac);
+    min-height: 3rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .face-card,
+  .option-btn,
+  .primary-btn {
+    animation: none !important;
+    transition: none !important;
+  }
+}
