@@ -10,6 +10,9 @@
     PLAYERS_KEY: "who-is-that-players"
   };
 
+  // The game always runs this many rounds, cycling players if there are fewer.
+  const TOTAL_ROUNDS = 10;
+
   const STATE = Object.freeze({
     START: "START",
     PLAYING: "PLAYING",
@@ -37,7 +40,8 @@
   const FILLER_NAMES = [
     "Rahul", "Priya", "Amit", "Neha", "Suresh", "Anita", "Vikram", "Kavita",
     "Ravi", "Sunita", "Arjun", "Meera", "Alex", "Casey", "Morgan", "Jordan",
-    "Sam", "Riley", "Taylor", "Jamie"
+    "Sam", "Riley", "Taylor", "Jamie", "Karan", "Pooja", "Nikhil", "Sneha",
+    "Deepak", "Divya", "Rohit", "Anjali", "Manish", "Shreya"
   ];
 
   function normalizeName(name) {
@@ -106,6 +110,7 @@
     currentPerson: null,
     usedPersonIds: [],
     roundOrder: [],
+    recentWrongNames: [],
     options: [],
     answered: false
   };
@@ -394,43 +399,66 @@
   }
 
   function generateOptions(correctPerson) {
-    const options = [{ id: correctPerson.id, name: correctPerson.name }];
-    const usedNames = new Set([normalizeName(correctPerson.name)]);
+    const correctName = correctPerson.name;
+    const correctKey = normalizeName(correctName);
 
-    // All real player names, used to keep filler names from matching a real player.
+    // All real player names, so filler names never match a real player.
     const realNames = new Set();
     for (let i = 0; i < players.length; i++) {
       realNames.add(normalizeName(players[i].name));
     }
 
-    // Add random unique names from OTHER real players.
-    const distractors = [];
+    const recentSet = new Set(game.recentWrongNames);
+    const seen = new Set();
+    const fresh = [];
+    const recent = [];
+
+    // Other real players' names (excluding the correct player).
     for (let i = 0; i < players.length; i++) {
-      if (players[i].id !== correctPerson.id) {
-        distractors.push(players[i]);
-      }
-    }
-    const shuffledDistractors = shuffleArray(distractors);
-    for (let i = 0; i < shuffledDistractors.length && options.length < 4; i++) {
-      const candidate = shuffledDistractors[i];
+      const candidate = players[i];
+      if (candidate.id === correctPerson.id) continue;
       const key = normalizeName(candidate.name);
-      if (usedNames.has(key)) continue;
-      usedNames.add(key);
-      options.push({ id: candidate.id, name: candidate.name });
+      if (key === correctKey || seen.has(key)) continue;
+      seen.add(key);
+      const entry = { id: candidate.id, name: candidate.name };
+      if (recentSet.has(key)) recent.push(entry); else fresh.push(entry);
     }
 
-    // Fill the remaining slots with unused filler names.
-    const shuffledFillers = shuffleArray(FILLER_NAMES);
+    // Filler names, skipping any that match a real player or the correct name.
     let fillerId = -1;
-    for (let i = 0; i < shuffledFillers.length && options.length < 4; i++) {
-      const name = shuffledFillers[i];
+    for (let i = 0; i < FILLER_NAMES.length; i++) {
+      const name = FILLER_NAMES[i];
       const key = normalizeName(name);
-      if (usedNames.has(key) || realNames.has(key)) continue;
-      usedNames.add(key);
+      if (key === correctKey || realNames.has(key) || seen.has(key)) continue;
+      seen.add(key);
+      const entry = { id: fillerId, name: name };
+      if (recentSet.has(key)) recent.push(entry); else fresh.push(entry);
       fillerId -= 1;
-      options.push({ id: fillerId, name: name });
     }
 
+    // Fresh shuffle every round; prefer names not used in the last rounds.
+    const shuffledFresh = shuffleArray(fresh);
+    const shuffledRecent = shuffleArray(recent);
+    const wrong = [];
+    for (let i = 0; i < shuffledFresh.length && wrong.length < 3; i++) {
+      wrong.push(shuffledFresh[i]);
+    }
+    for (let i = 0; i < shuffledRecent.length && wrong.length < 3; i++) {
+      wrong.push(shuffledRecent[i]);
+    }
+
+    // Remember the wrong names used this round (keep the last two rounds).
+    const chosenKeys = [];
+    for (let i = 0; i < wrong.length; i++) {
+      chosenKeys.push(normalizeName(wrong[i].name));
+    }
+    game.recentWrongNames = game.recentWrongNames.concat(chosenKeys).slice(-6);
+
+    // Final options = correct name + 3 wrong names, shuffled.
+    const options = [{ id: correctPerson.id, name: correctName }];
+    for (let i = 0; i < wrong.length; i++) {
+      options.push(wrong[i]);
+    }
     return shuffleArray(options);
   }
 
@@ -574,13 +602,18 @@
       players.push(list[i]);
     }
     savePlayers(players);
-    const totalRounds = Math.min(players.length, CONFIG.TOTAL_ROUNDS);
-    game.roundOrder = shuffleArray(players).slice(0, totalRounds);
+    const shuffledPlayers = shuffleArray(players);
+    const roundOrder = [];
+    for (let i = 0; i < TOTAL_ROUNDS; i++) {
+      roundOrder.push(shuffledPlayers[i % shuffledPlayers.length]);
+    }
+    game.roundOrder = roundOrder;
     game.round = 1;
-    game.totalRounds = totalRounds;
+    game.totalRounds = TOTAL_ROUNDS;
     game.correctCount = 0;
     game.usedPersonIds = [];
     game.currentPerson = null;
+    game.recentWrongNames = [];
     game.answered = false;
     el.setupScreen.classList.add("hidden");
     el.startScreen.classList.add("hidden");
