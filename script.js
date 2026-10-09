@@ -33,6 +33,17 @@
     "Excellent!"
   ];
 
+  // Filler names used only when the user has fewer than 4 real players.
+  const FILLER_NAMES = [
+    "Rahul", "Priya", "Amit", "Neha", "Suresh", "Anita", "Vikram", "Kavita",
+    "Ravi", "Sunita", "Arjun", "Meera", "Alex", "Casey", "Morgan", "Jordan",
+    "Sam", "Riley", "Taylor", "Jamie"
+  ];
+
+  function normalizeName(name) {
+    return String(name).trim().toLowerCase();
+  }
+
   // replaced by user-input players array
   // const people = [
   //   { id: 1, name: "Alex", image: "./assets/placeholder1.svg", relationship: "" },
@@ -383,7 +394,16 @@
   }
 
   function generateOptions(correctPerson) {
-    const options = [correctPerson];
+    const options = [{ id: correctPerson.id, name: correctPerson.name }];
+    const usedNames = new Set([normalizeName(correctPerson.name)]);
+
+    // All real player names, used to keep filler names from matching a real player.
+    const realNames = new Set();
+    for (let i = 0; i < players.length; i++) {
+      realNames.add(normalizeName(players[i].name));
+    }
+
+    // Add random unique names from OTHER real players.
     const distractors = [];
     for (let i = 0; i < players.length; i++) {
       if (players[i].id !== correctPerson.id) {
@@ -391,16 +411,27 @@
       }
     }
     const shuffledDistractors = shuffleArray(distractors);
-    let distractorsNeeded = 3;
-    if (distractorsNeeded > shuffledDistractors.length) {
-      distractorsNeeded = shuffledDistractors.length;
+    for (let i = 0; i < shuffledDistractors.length && options.length < 4; i++) {
+      const candidate = shuffledDistractors[i];
+      const key = normalizeName(candidate.name);
+      if (usedNames.has(key)) continue;
+      usedNames.add(key);
+      options.push({ id: candidate.id, name: candidate.name });
     }
-    for (let i = 0; i < distractorsNeeded; i++) {
-      options.push(shuffledDistractors[i]);
+
+    // Fill the remaining slots with unused filler names.
+    const shuffledFillers = shuffleArray(FILLER_NAMES);
+    let fillerId = -1;
+    for (let i = 0; i < shuffledFillers.length && options.length < 4; i++) {
+      const name = shuffledFillers[i];
+      const key = normalizeName(name);
+      if (usedNames.has(key) || realNames.has(key)) continue;
+      usedNames.add(key);
+      fillerId -= 1;
+      options.push({ id: fillerId, name: name });
     }
-    const shuffled = shuffleArray(options);
-    if (shuffled.length > 4) return shuffled.slice(0, 4);
-    return shuffled;
+
+    return shuffleArray(options);
   }
 
   function generateQuestion() {
@@ -543,9 +574,10 @@
       players.push(list[i]);
     }
     savePlayers(players);
-    game.roundOrder = shuffleArray(players);
+    const totalRounds = Math.min(players.length, CONFIG.TOTAL_ROUNDS);
+    game.roundOrder = shuffleArray(players).slice(0, totalRounds);
     game.round = 1;
-    game.totalRounds = players.length;
+    game.totalRounds = totalRounds;
     game.correctCount = 0;
     game.usedPersonIds = [];
     game.currentPerson = null;

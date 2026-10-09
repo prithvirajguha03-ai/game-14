@@ -58,6 +58,14 @@
     @apply w-full rounded-2xl border-2 border-warm-200 bg-white px-4 py-3 text-base font-bold text-warm-800 transition hover:bg-warm-50 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-400 disabled:cursor-not-allowed disabled:opacity-60 sm:px-6 sm:py-4 sm:text-lg;
     box-shadow: 0 3px 0 var(--color-warm-200);
     min-height: 3.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    text-align: center;
+    font-size: clamp(14px, 2.5vw, 20px);
   }
 
   .option-btn.correct {

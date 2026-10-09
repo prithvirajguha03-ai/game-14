@@ -1219,3 +1219,16 @@
     line-height: var(--tw-leading, var(--text-xl--line-height));
   }
 }
+
+/* Long-name handling for option buttons.
+   Only adds text layout; existing colors, borders, hover and grid are untouched. */
+.option-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  text-align: center;
+  font-size: clamp(14px, 2.5vw, 20px);
+}
