@@ -1034,3 +1034,130 @@
     }
   }
 }
+
+/* Setup screen (player input) styles */
+.setup-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 1rem;
+  border: 2px solid var(--color-warm-200, #f6dfc1);
+  background-color: #fff;
+  padding: 0.75rem;
+  box-shadow: 0 2px 0 var(--color-warm-200, #f6dfc1);
+}
+
+@media (min-width: 640px) {
+  .setup-row {
+    gap: 1rem;
+    padding: 1rem;
+  }
+}
+
+.setup-number {
+  display: grid;
+  height: 2rem;
+  width: 2rem;
+  flex-shrink: 0;
+  place-items: center;
+  border-radius: 9999px;
+  background-color: var(--color-teal-100, #d3f5f0);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 900;
+  color: var(--color-teal-900, #134e4a);
+}
+
+.setup-thumb {
+  height: 60px;
+  width: 60px;
+  flex-shrink: 0;
+  border-radius: 0.75rem;
+  border: 2px solid var(--color-warm-200, #f6dfc1);
+  background-color: var(--color-warm-50, #fffaf3);
+  object-fit: cover;
+}
+
+.setup-file-label {
+  display: inline-flex;
+  min-height: 2.75rem;
+  flex-shrink: 0;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  border: 2px solid var(--color-warm-300, #efcda3);
+  background-color: #fdf3e3;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 900;
+  color: var(--color-warm-800, #5f3d28);
+  transition-property: color, background-color, border-color, box-shadow;
+  transition-duration: 150ms;
+  box-shadow: 0 2px 0 var(--color-warm-300, #efcda3);
+}
+
+.setup-file-label:hover {
+  background-color: var(--color-warm-200, #f6dfc1);
+}
+
+.setup-file-label:focus-within {
+  outline: none;
+  box-shadow: 0 0 0 4px var(--color-teal-400, #2dd4bf);
+}
+
+.setup-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.setup-name-input {
+  min-height: 2.75rem;
+  width: 100%;
+  min-width: 0;
+  flex: 1 1 0%;
+  border-radius: 1rem;
+  border: 2px solid var(--color-warm-200, #f6dfc1);
+  background-color: #fff;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-weight: 700;
+  color: var(--color-warm-800, #5f3d28);
+}
+
+.setup-name-input::placeholder {
+  font-weight: 600;
+  color: var(--color-warm-400, #e6b585);
+}
+
+.setup-name-input:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px var(--color-teal-400, #2dd4bf);
+}
+
+/* Utility fallbacks used by the setup screen that were not in the compiled build */
+.mt-4 {
+  margin-top: calc(var(--spacing) * 4);
+}
+
+.font-black {
+  font-weight: var(--font-weight-black, 900);
+}
+
+@media (width >= 40rem) {
+  .sm\:text-xl {
+    font-size: var(--text-xl);
+    line-height: var(--tw-leading, var(--text-xl--line-height));
+  }
+}
