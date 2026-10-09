@@ -56,10 +56,11 @@
     <main class="stage-wrap flex min-h-0 flex-1 flex-col items-center justify-center gap-4 sm:gap-6">
       <section id="setupScreen" class="w-full flex items-center justify-center">
         <div class="pixel-panel w-full max-w-2xl">
-          <h2 class="text-center font-pixel text-base leading-relaxed text-teal-800 sm:text-xl">Add 10 People</h2>
-          <p class="mt-2 text-center text-base font-bold text-warm-700">Upload a photo and enter a name for each person</p>
+          <h2 class="text-center font-pixel text-base leading-relaxed text-teal-800 sm:text-xl">Add People</h2>
+          <p class="mt-2 text-center text-base font-bold text-warm-700">Upload a photo and enter a name for each person (1 to 10 people)</p>
           <div id="setupRows" class="mt-4 flex flex-col gap-3"></div>
-          <p id="setupProgress" class="mt-4 text-center text-base font-black text-teal-800" aria-live="polite">0 / 10 ready</p>
+          <button type="button" id="addPersonBtn" class="setup-add-btn mt-3">+ Add another person</button>
+          <p id="setupProgress" class="mt-4 text-center text-base font-black text-teal-800" aria-live="polite">0 people ready</p>
           <div class="mt-3 flex justify-center">
             <button type="button" id="startGameBtn" class="primary-btn" disabled>START GAME</button>
           </div>

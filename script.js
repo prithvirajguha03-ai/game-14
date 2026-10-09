@@ -4,6 +4,8 @@
   const CONFIG = {
     TOTAL_ROUNDS: 10,
     PLAYER_COUNT: 10,
+    MAX_PLAYERS: 10,
+    MIN_PLAYERS: 1,
     BEST_KEY: "who-is-that.best.v1",
     PLAYERS_KEY: "who-is-that-players"
   };
@@ -79,6 +81,7 @@
   const btn = {
     start: $("btnStart"),
     startGame: $("startGameBtn"),
+    addPerson: $("addPersonBtn"),
     next: $("btnNext"),
     playAgain: $("btnPlayAgain")
   };
@@ -91,6 +94,7 @@
     best: { score: 0, total: CONFIG.TOTAL_ROUNDS },
     currentPerson: null,
     usedPersonIds: [],
+    roundOrder: [],
     options: [],
     answered: false
   };
@@ -136,11 +140,25 @@
   }
 
   function makeEmptyDrafts() {
-    const list = [];
-    for (let i = 0; i < CONFIG.PLAYER_COUNT; i++) {
-      list.push({ id: i, name: "", imageUrl: "" });
+    return [{ slot: 0, name: "", imageUrl: "" }];
+  }
+
+  function findDraft(slot) {
+    for (let i = 0; i < drafts.length; i++) {
+      if (drafts[i].slot === slot) return drafts[i];
     }
-    return list;
+    return null;
+  }
+
+  function getFreeSlot() {
+    for (let s = 0; s < CONFIG.MAX_PLAYERS; s++) {
+      let used = false;
+      for (let i = 0; i < drafts.length; i++) {
+        if (drafts[i].slot === s) { used = true; break; }
+      }
+      if (!used) return s;
+    }
+    return -1;
   }
 
   function readyCount() {
@@ -157,94 +175,145 @@
   function updateSetupProgress() {
     const count = readyCount();
     if (el.setupProgress !== null) {
-      el.setupProgress.textContent = count + " / " + CONFIG.PLAYER_COUNT + " ready";
+      el.setupProgress.textContent = count + " people ready";
     }
     if (btn.startGame !== null) {
-      btn.startGame.disabled = count < CONFIG.PLAYER_COUNT;
+      btn.startGame.disabled = count < CONFIG.MIN_PLAYERS;
     }
+    if (btn.addPerson !== null) {
+      btn.addPerson.classList.toggle("hidden", drafts.length >= CONFIG.MAX_PLAYERS);
+    }
+  }
+
+  function createSetupRow(slot) {
+    if (el.setupRows === null) return null;
+    const row = document.createElement("div");
+    row.className = "setup-row";
+    row.dataset.slot = String(slot);
+
+    const number = document.createElement("span");
+    number.className = "setup-number";
+    number.textContent = String(slot + 1);
+    row.appendChild(number);
+
+    const thumb = document.createElement("img");
+    thumb.className = "setup-thumb hidden";
+    thumb.alt = "";
+    row.appendChild(thumb);
+
+    const fileLabel = document.createElement("label");
+    fileLabel.className = "setup-file-label";
+    fileLabel.textContent = "Choose photo";
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = "image/*";
+    fileInput.className = "setup-file-input";
+    fileInput.dataset.slot = String(slot);
+    fileLabel.appendChild(fileInput);
+    row.appendChild(fileLabel);
+
+    const nameInput = document.createElement("input");
+    nameInput.type = "text";
+    nameInput.placeholder = "Enter name";
+    nameInput.className = "setup-name-input";
+    row.appendChild(nameInput);
+
+    const removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.className = "setup-remove";
+    removeBtn.setAttribute("aria-label", "Remove person");
+    removeBtn.textContent = "\u00D7";
+    row.appendChild(removeBtn);
+
+    fileInput.addEventListener("change", function(event) {
+      const draft = findDraft(slot);
+      if (draft === null) return;
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function() {
+        draft.imageUrl = String(reader.result);
+        thumb.src = draft.imageUrl;
+        thumb.classList.remove("hidden");
+        updateSetupProgress();
+      };
+      reader.readAsDataURL(file);
+    });
+
+    nameInput.addEventListener("input", function(event) {
+      const draft = findDraft(slot);
+      if (draft === null) return;
+      draft.name = event.target.value;
+      updateSetupProgress();
+    });
+
+    removeBtn.addEventListener("click", function() {
+      removeRow(slot);
+    });
+
+    el.setupRows.appendChild(row);
+    return row;
+  }
+
+  function addRow() {
+    if (drafts.length >= CONFIG.MAX_PLAYERS) return;
+    const slot = getFreeSlot();
+    if (slot < 0) return;
+    drafts.push({ slot: slot, name: "", imageUrl: "" });
+    createSetupRow(slot);
+    updateSetupProgress();
+  }
+
+  function removeRow(slot) {
+    for (let i = 0; i < drafts.length; i++) {
+      if (drafts[i].slot === slot) {
+        drafts.splice(i, 1);
+        break;
+      }
+    }
+    if (el.setupRows !== null) {
+      const row = el.setupRows.querySelector('.setup-row[data-slot="' + slot + '"]');
+      if (row !== null) row.remove();
+    }
+    updateSetupProgress();
   }
 
   function buildSetupRows() {
     if (el.setupRows === null) return;
     el.setupRows.innerHTML = "";
-    for (let i = 0; i < CONFIG.PLAYER_COUNT; i++) {
-      const row = document.createElement("div");
-      row.className = "setup-row";
-
-      const number = document.createElement("span");
-      number.className = "setup-number";
-      number.textContent = String(i + 1);
-      row.appendChild(number);
-
-      const thumb = document.createElement("img");
-      thumb.className = "setup-thumb hidden";
-      thumb.alt = "";
-      row.appendChild(thumb);
-
-      const fileLabel = document.createElement("label");
-      fileLabel.className = "setup-file-label";
-      fileLabel.textContent = "Choose photo";
-      const fileInput = document.createElement("input");
-      fileInput.type = "file";
-      fileInput.accept = "image/*";
-      fileInput.className = "setup-file-input";
-      fileLabel.appendChild(fileInput);
-      row.appendChild(fileLabel);
-
-      const nameInput = document.createElement("input");
-      nameInput.type = "text";
-      nameInput.placeholder = "Enter name";
-      nameInput.className = "setup-name-input";
-      row.appendChild(nameInput);
-
-      fileInput.addEventListener("change", (function(idx, preview) {
-        return function(event) {
-          const file = event.target.files && event.target.files[0];
-          if (!file) return;
-          const reader = new FileReader();
-          reader.onload = function() {
-            drafts[idx].imageUrl = String(reader.result);
-            preview.src = String(reader.result);
-            preview.classList.remove("hidden");
-            updateSetupProgress();
-          };
-          reader.readAsDataURL(file);
-        };
-      })(i, thumb));
-
-      nameInput.addEventListener("input", (function(idx) {
-        return function(event) {
-          drafts[idx].name = event.target.value;
-          updateSetupProgress();
-        };
-      })(i));
-
-      el.setupRows.appendChild(row);
+    for (let i = 0; i < drafts.length; i++) {
+      createSetupRow(drafts[i].slot);
     }
   }
 
   function prefillSetup(saved) {
     if (el.setupRows === null) return;
-    for (let i = 0; i < CONFIG.PLAYER_COUNT; i++) {
-      const data = saved && saved[i] ? saved[i] : null;
-      if (data === null) continue;
-      if (typeof data.name === "string") {
-        drafts[i].name = data.name;
+    if (!Array.isArray(saved)) return;
+    const valid = [];
+    for (let i = 0; i < saved.length && valid.length < CONFIG.MAX_PLAYERS; i++) {
+      const data = saved[i];
+      if (data && typeof data.name === "string" && data.name.trim().length > 0 &&
+          typeof data.imageUrl === "string" && data.imageUrl.length > 0) {
+        valid.push({ slot: valid.length, name: data.name.trim(), imageUrl: data.imageUrl });
       }
-      if (typeof data.imageUrl === "string" && data.imageUrl.length > 0) {
-        drafts[i].imageUrl = data.imageUrl;
-      }
+    }
+    if (valid.length === 0) return;
+    el.setupRows.innerHTML = "";
+    drafts = [];
+    for (let i = 0; i < valid.length; i++) {
+      drafts.push(valid[i]);
+      createSetupRow(valid[i].slot);
     }
     const rows = el.setupRows.querySelectorAll(".setup-row");
     for (let i = 0; i < rows.length; i++) {
-      const row = rows[i];
-      const nameInput = row.querySelector(".setup-name-input");
-      const thumb = row.querySelector(".setup-thumb");
-      if (drafts[i].name.length > 0 && nameInput !== null) {
-        nameInput.value = drafts[i].name;
+      const draft = drafts[i];
+      const nameInput = rows[i].querySelector(".setup-name-input");
+      const thumb = rows[i].querySelector(".setup-thumb");
+      if (nameInput !== null && draft.name.length > 0) {
+        nameInput.value = draft.name;
       }
-      if (drafts[i].imageUrl.length > 0 && thumb !== null) {
-        thumb.src = drafts[i].imageUrl;
+      if (thumb !== null && draft.imageUrl.length > 0) {
+        thumb.src = draft.imageUrl;
         thumb.classList.remove("hidden");
       }
     }
@@ -254,7 +323,10 @@
   function collectPlayers() {
     const list = [];
     for (let i = 0; i < drafts.length; i++) {
-      list.push({ id: i, name: drafts[i].name.trim(), imageUrl: drafts[i].imageUrl });
+      const draft = drafts[i];
+      if (draft.imageUrl && draft.name && draft.name.trim().length > 0) {
+        list.push({ id: i, name: draft.name.trim(), imageUrl: draft.imageUrl });
+      }
     }
     return list;
   }
@@ -332,11 +404,17 @@
   }
 
   function generateQuestion() {
-    const exclude = game.usedPersonIds.slice();
-    if (game.round > 0 && game.currentPerson !== null) {
-      exclude.push(game.currentPerson.id);
+    let person = null;
+    if (game.roundOrder.length > 0 && game.round >= 1 && game.round <= game.roundOrder.length) {
+      person = game.roundOrder[game.round - 1];
     }
-    const person = getRandomPerson(exclude);
+    if (person === null || person === undefined) {
+      const exclude = game.usedPersonIds.slice();
+      if (game.round > 0 && game.currentPerson !== null) {
+        exclude.push(game.currentPerson.id);
+      }
+      person = getRandomPerson(exclude);
+    }
     game.currentPerson = person;
     game.usedPersonIds.push(person.id);
     if (game.usedPersonIds.length > players.length) {
@@ -458,15 +536,16 @@
   }
 
   function startGame() {
-    if (readyCount() < CONFIG.PLAYER_COUNT) return;
-    players.length = 0;
     const list = collectPlayers();
+    if (list.length < CONFIG.MIN_PLAYERS) return;
+    players.length = 0;
     for (let i = 0; i < list.length; i++) {
       players.push(list[i]);
     }
-    savePlayers(list);
+    savePlayers(players);
+    game.roundOrder = shuffleArray(players);
     game.round = 1;
-    game.totalRounds = CONFIG.PLAYER_COUNT;
+    game.totalRounds = players.length;
     game.correctCount = 0;
     game.usedPersonIds = [];
     game.currentPerson = null;
@@ -511,6 +590,9 @@
     if (btn.startGame !== null) {
       btn.startGame.addEventListener("click", startGame);
     }
+    if (btn.addPerson !== null) {
+      btn.addPerson.addEventListener("click", addRow);
+    }
     btn.next.addEventListener("click", nextRound);
     btn.playAgain.addEventListener("click", restartGame);
     window.addEventListener("keydown", function(event) {
@@ -548,7 +630,7 @@
     el.completeScreen.classList.add("hidden");
     updateSetupProgress();
     bindEvents();
-    announce("Who Is That? Add 10 people, then start the game. No rush, take your time.");
+    announce("Who Is That? Add at least one person, then start the game. No rush, take your time.");
   }
 
   init();

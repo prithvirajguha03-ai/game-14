@@ -1146,6 +1146,64 @@
   box-shadow: 0 0 0 4px var(--color-teal-400, #2dd4bf);
 }
 
+.setup-remove {
+  display: inline-flex;
+  height: 2rem;
+  width: 2rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  border-radius: 9999px;
+  border: 2px solid #fecaca;
+  background-color: #fff1f2;
+  font-size: 1.25rem;
+  line-height: 1;
+  font-weight: 900;
+  color: #be123c;
+  cursor: pointer;
+  transition-property: background-color, border-color, color, box-shadow;
+  transition-duration: 150ms;
+}
+
+.setup-remove:hover {
+  background-color: #ffe4e6;
+}
+
+.setup-remove:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px var(--color-teal-400, #2dd4bf);
+}
+
+.setup-add-btn {
+  display: inline-flex;
+  min-height: 3rem;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  border: 2px dashed var(--color-teal-400, #2dd4bf);
+  background-color: transparent;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-weight: 800;
+  color: var(--color-teal-800, #115e59);
+  cursor: pointer;
+  transition-property: background-color, box-shadow;
+  transition-duration: 150ms;
+}
+
+.setup-add-btn:hover {
+  background-color: #f0fdfa;
+}
+
+.setup-add-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px var(--color-teal-400, #2dd4bf);
+}
+
 /* Utility fallbacks used by the setup screen that were not in the compiled build */
 .mt-4 {
   margin-top: calc(var(--spacing) * 4);
